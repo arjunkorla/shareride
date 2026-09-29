@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: postgis/postgis:16-3.4
+    container_name: shareride-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: shareride
+      POSTGRES_PASSWORD: shareride
+      POSTGRES_DB: shareride
+    ports:
+      - "5432:5432"
+    volumes:
+      - shareride-postgres-data:/var/lib/postgresql/data
+      - ./infrastructure/docker/postgres/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U shareride -d shareride"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: shareride-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - shareride-redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  shareride-postgres-data:
+  shareride-redis-data:
